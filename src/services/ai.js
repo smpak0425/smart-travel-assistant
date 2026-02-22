@@ -13,7 +13,7 @@ export async function generateSmartTips(locationContext) {
   const userName = localStorage.getItem('USER_NAME') || "사용자";
 
   // Use the absolute highest tier and smartest Gemini model available
-  const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
   const prompt = `
 당신은 스마트 여행 비서입니다. 사용자인 "${userName}"님이 "${locationContext}" 주변에서 여행 일정을 소화 중입니다.
@@ -72,7 +72,7 @@ export async function parseFreeformItinerary(freeformText) {
 
   const genAI = new GoogleGenerativeAI(API_KEY);
   const model = genAI.getGenerativeModel({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash-lite",
     generationConfig: {
       responseMimeType: "application/json"
     }
@@ -163,7 +163,7 @@ export async function generateVirtualTourExperience(eventInfo, currentIndex, tot
   if (!API_KEY) return "API 키가 설정되지 않아 가상 체험을 생성할 수 없습니다.";
 
   const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
   const prompt = `
 당신은 생생한 여행 가이드입니다.
