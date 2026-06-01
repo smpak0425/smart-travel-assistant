@@ -137,7 +137,7 @@ function App() {
                   </div>
 
                   <div className="timeline-items">
-                    <TransitCard apiKey={mapApiKey} />
+                    <TransitCard apiKey={mapApiKey} events={events} />
 
                     {loadingAI ? (
                       <div className="timeline-item timeline-branch-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', flexDirection: 'column', gap: '8px', color: '#888' }}>
