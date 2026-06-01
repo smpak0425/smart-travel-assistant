@@ -7,40 +7,54 @@ const MAP_CONTAINER_STYLE = {
     borderRadius: '16px',
 };
 
-// 메이지 신궁 위도/경도
-const DEFAULT_CENTER = {
-    lat: 35.6764,
-    lng: 139.6993,
-};
+const DEFAULT_CENTER = { lat: 48.8566, lng: 2.3522 }; // 파리 (기본값)
 
-function MiniMap({ apiKey }) {
+function MiniMap({ apiKey, origin, destination }) {
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: apiKey,
     });
 
     const [directions, setDirections] = React.useState(null);
+    const [center, setCenter] = React.useState(DEFAULT_CENTER);
 
     React.useEffect(() => {
-        if (isLoaded && window.google) {
+        if (isLoaded && window.google && origin && destination) {
             const directionsService = new window.google.maps.DirectionsService();
-
             directionsService.route(
                 {
-                    origin: { lat: 35.6764, lng: 139.6993 }, // 메이지 신궁
-                    destination: { lat: 35.6580, lng: 139.7016 }, // 시부야 스크램블 교차로
-                    travelMode: window.google.maps.TravelMode.TRANSIT, // 대중교통
+                    origin: origin,
+                    destination: destination,
+                    travelMode: window.google.maps.TravelMode.TRANSIT,
                 },
                 (result, status) => {
                     if (status === window.google.maps.DirectionsStatus.OK) {
                         setDirections(result);
+                        const leg = result.routes[0].legs[0];
+                        setCenter(leg.start_location.toJSON());
                     } else {
-                        console.error(`Error fetching directions ${result}`);
+                        // TRANSIT 실패 시 DRIVING으로 재시도
+                        directionsService.route(
+                            {
+                                origin: origin,
+                                destination: destination,
+                                travelMode: window.google.maps.TravelMode.DRIVING,
+                            },
+                            (result2, status2) => {
+                                if (status2 === window.google.maps.DirectionsStatus.OK) {
+                                    setDirections(result2);
+                                    const leg = result2.routes[0].legs[0];
+                                    setCenter(leg.start_location.toJSON());
+                                } else {
+                                    console.error('Directions error:', status2);
+                                }
+                            }
+                        );
                     }
                 }
             );
         }
-    }, [isLoaded]);
+    }, [isLoaded, origin, destination]);
 
     if (!isLoaded) return <div className="map-placeholder pulse">지도를 불러오는 중...</div>;
 
@@ -48,90 +62,30 @@ function MiniMap({ apiKey }) {
         <div style={{ height: '240px', width: '100%', padding: '12px 16px 0 16px' }}>
             <GoogleMap
                 mapContainerStyle={MAP_CONTAINER_STYLE}
-                center={DEFAULT_CENTER}
+                center={center}
                 zoom={14}
                 options={{
-                    disableDefaultUI: true, // 깔끔한 모바일 UI를 위해 기본 컨트롤 숨김
+                    disableDefaultUI: true,
                     styles: [
                         { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
                         { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
                         { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-                        {
-                            featureType: "administrative.locality",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#d59563" }],
-                        },
-                        {
-                            featureType: "poi",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#d59563" }],
-                        },
-                        {
-                            featureType: "poi.park",
-                            elementType: "geometry",
-                            stylers: [{ color: "#263c3f" }],
-                        },
-                        {
-                            featureType: "poi.park",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#6b9a76" }],
-                        },
-                        {
-                            featureType: "road",
-                            elementType: "geometry",
-                            stylers: [{ color: "#38414e" }],
-                        },
-                        {
-                            featureType: "road",
-                            elementType: "geometry.stroke",
-                            stylers: [{ color: "#212a37" }],
-                        },
-                        {
-                            featureType: "road",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#9ca5b3" }],
-                        },
-                        {
-                            featureType: "road.highway",
-                            elementType: "geometry",
-                            stylers: [{ color: "#746855" }],
-                        },
-                        {
-                            featureType: "road.highway",
-                            elementType: "geometry.stroke",
-                            stylers: [{ color: "#1f2835" }],
-                        },
-                        {
-                            featureType: "road.highway",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#f3d19c" }],
-                        },
-                        {
-                            featureType: "transit",
-                            elementType: "geometry",
-                            stylers: [{ color: "#2f3948" }],
-                        },
-                        {
-                            featureType: "transit.station",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#d59563" }],
-                        },
-                        {
-                            featureType: "water",
-                            elementType: "geometry",
-                            stylers: [{ color: "#17263c" }],
-                        },
-                        {
-                            featureType: "water",
-                            elementType: "labels.text.fill",
-                            stylers: [{ color: "#515c6d" }],
-                        },
-                        {
-                            featureType: "water",
-                            elementType: "labels.text.stroke",
-                            stylers: [{ color: "#17263c" }],
-                        },
-                    ], // 구글 맵 다크 테마 적용
+                        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+                        { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+                        { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+                        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+                        { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+                        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+                        { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+                        { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+                        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+                        { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+                        { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+                        { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+                        { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] },
+                    ],
                 }}
             >
                 {directions && (
@@ -140,7 +94,7 @@ function MiniMap({ apiKey }) {
                         options={{
                             suppressMarkers: false,
                             polylineOptions: {
-                                strokeColor: '#4b82f3', // 앱 테마색상 (파란색)
+                                strokeColor: '#4b82f3',
                                 strokeWeight: 5,
                             },
                         }}
