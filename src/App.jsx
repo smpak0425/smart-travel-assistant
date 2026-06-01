@@ -8,6 +8,7 @@ import TransitCard from './components/cards/TransitCard';
 import EtiquetteCard from './components/cards/EtiquetteCard';
 import DiningCard from './components/cards/DiningCard';
 import RestroomCard from './components/cards/RestroomCard';
+import RecommendationCard from './components/cards/RecommendationCard';
 import ItineraryManager from './components/ItineraryManager';
 import TravelDiary from './components/TravelDiary';
 import VirtualTour from './components/VirtualTour';
