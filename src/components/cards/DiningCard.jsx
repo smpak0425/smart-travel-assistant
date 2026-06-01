@@ -9,11 +9,14 @@ function DiningCard({ data }) {
 
     if (!data) return null;
 
+    const langCode = data.phrase?.langCode || 'en';
+    const bcp47 = langCode.includes('-') ? langCode : `${langCode}-${langCode.toUpperCase()}`;
+
     const speakPhrase = (text) => {
         if ('speechSynthesis' in window) {
             setIsPlaying(true);
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
+            utterance.lang = bcp47;
             utterance.onend = () => setIsPlaying(false);
             utterance.onerror = () => setIsPlaying(false);
             window.speechSynthesis.speak(utterance);
@@ -25,8 +28,7 @@ function DiningCard({ data }) {
     const handleTranslate = async () => {
         if (!inputText) return;
         setLoadingTranslate(true);
-        // 한국어를 일본어로 번역
-        const result = await translateText(inputText, 'ja');
+        const result = await translateText(inputText, langCode);
         setTranslatedText(result);
         setLoadingTranslate(false);
     };
@@ -56,27 +58,27 @@ function DiningCard({ data }) {
                     <div>
                         <p className="section-label">AI 추천 옵션 (Gemini 분석)</p>
                         <div className="pill-row wrap">
-                            {data.items.map((item, idx) => (
+                            {data.items && data.items.map((item, idx) => (
                                 <span key={idx} className={idx === 0 ? "pill pill-primary" : "pill pill-gray"}>{item}</span>
                             ))}
                         </div>
                     </div>
 
-                    <div className="sub-card flex-between padding-md mb-2">
-                        <div className="phrase-box">
-                            <span className="phrase-label">상황별 추천 일본어 (AI)</span>
-                            <span className="phrase-text">"{data.phrase.japanese}"</span>
-                            <span className="phrase-desc">{data.phrase.meaning}</span>
+                    {data.phrase && (
+                        <div className="sub-card flex-between padding-md mb-2">
+                            <div className="phrase-box">
+                                <span className="phrase-label">상황별 추천 현지어 (AI)</span>
+                                <span className="phrase-text">"{data.phrase.local || data.phrase.original}"</span>
+                                <span className="phrase-desc">{data.phrase.meaning}</span>
+                            </div>
+                            <button
+                                className={`fab-button primary-shadow ${isPlaying ? 'pulse' : ''}`}
+                                onClick={() => speakPhrase(data.phrase.original)}
+                            >
+                                <span className="material-symbols-outlined">volume_up</span>
+                            </button>
                         </div>
-                        <button
-                            className={`fab-button primary-shadow ${isPlaying ? 'pulse' : ''}`}
-                            onClick={() => speakPhrase(data.phrase.original)}
-                        >
-                            <span className="material-symbols-outlined">
-                                {isPlaying ? 'volume_up' : 'volume_up'}
-                            </span>
-                        </button>
-                    </div>
+                    )}
 
                     <div className="sub-card padding-md">
                         <span className="phrase-label mb-2" style={{ display: 'block' }}>실시간 통역기 (Google Translate)</span>
