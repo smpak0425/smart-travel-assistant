@@ -4,6 +4,7 @@ function SetupScreen({ isEditing, onComplete }) {
   const [form, setForm] = useState({
     appName: localStorage.getItem('APP_NAME') || '나의 여행 비서',
     geminiKey: localStorage.getItem('GEMINI_API_KEY') || '',
+    geminiModel: localStorage.getItem('GEMINI_MODEL') || 'gemini-2.0-flash-lite',
     mapsKey: localStorage.getItem('GOOGLE_MAPS_API_KEY') || '',
     translateKey: localStorage.getItem('GOOGLE_TRANSLATE_API_KEY') || '',
   });
@@ -18,6 +19,7 @@ function SetupScreen({ isEditing, onComplete }) {
     }
     localStorage.setItem('APP_NAME', form.appName.trim() || '나의 여행 비서');
     localStorage.setItem('GEMINI_API_KEY', form.geminiKey.trim());
+    localStorage.setItem('GEMINI_MODEL', form.geminiModel);
     localStorage.setItem('GOOGLE_MAPS_API_KEY', form.mapsKey.trim());
     localStorage.setItem('GOOGLE_TRANSLATE_API_KEY', form.translateKey.trim());
     onComplete();
@@ -46,6 +48,15 @@ function SetupScreen({ isEditing, onComplete }) {
           <a className="help-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">
             🔑 무료 발급받기 →
           </a>
+        </div>
+
+        <div className="form-group">
+          <label>Gemini 모델</label>
+          <select value={form.geminiModel} onChange={set('geminiModel')} className="lang-select" style={{ width: '100%' }}>
+            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite (기본, 무료 쿼터 여유)</option>
+            <option value="gemini-2.0-flash">gemini-2.0-flash (더 정확, 쿼터 소모 빠름)</option>
+            <option value="gemini-1.5-flash">gemini-1.5-flash (구형, 안정적)</option>
+          </select>
         </div>
 
         <div className="form-group">

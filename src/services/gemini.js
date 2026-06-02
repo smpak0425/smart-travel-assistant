@@ -5,7 +5,7 @@ function getModel(jsonMode = false) {
   if (!key) throw new Error('Gemini API 키가 설정되지 않았습니다.');
   const genAI = new GoogleGenerativeAI(key);
   return genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: localStorage.getItem('GEMINI_MODEL') || 'gemini-2.0-flash-lite',
     ...(jsonMode && { generationConfig: { responseMimeType: 'application/json' } }),
   });
 }
