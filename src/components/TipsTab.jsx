@@ -30,7 +30,7 @@ function TipsTab({ events }) {
       const data = await generateTravelTips(context);
       setTips(data);
     } catch (e) {
-      setError('AI 팁 생성 실패: ' + e.message);
+      setError(e.message.includes('429') ? '⚠️ API 쿼터 초과 — 새 API 키를 발급하거나 내일 다시 시도해주세요.' : 'AI 팁 생성 실패: ' + e.message);
     }
     setLoading(false);
   };

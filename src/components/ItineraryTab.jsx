@@ -27,7 +27,7 @@ function ItineraryTab({ events, onEventsChange }) {
       onEventsChange(parsed);
       setShowInput(false);
     } catch (e) {
-      setError('분석 실패: ' + e.message);
+      setError(e.message.includes('429') ? '⚠️ API 쿼터 초과 — 새 API 키를 발급하거나 내일 다시 시도해주세요.' : '분석 실패: ' + e.message);
     }
     setLoading(false);
   };
